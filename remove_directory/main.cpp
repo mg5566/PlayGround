@@ -4,6 +4,16 @@
 #include <unistd.h>    // rmdir(2)
 
 #include <iostream>
+
+std::string make_new_path(std::string path, char *d_name) {
+  std::string new_path(path);
+
+  new_path += "/";
+  new_path += d_name;
+
+  return (new_path);
+}
+
 int delete_path_recurcive(std::string &path) {
   struct stat stat_buffer;
   // path 설정
@@ -26,10 +36,14 @@ int delete_path_recurcive(std::string &path) {
     while ((item = readdir(dir_ptr))) {
       if (strcmp(item->d_name, ".") == 0 || strcmp(item->d_name, "..") == 0)
         continue;
+      /*
       std::string new_path(path);
       new_path += "/";
       new_path += item->d_name;
       std::cout << "Good?! : " << new_path << std::endl;
+      */
+      std::string new_path = make_new_path(path, item->d_name);
+      std::cout << "test print new_path : " << new_path << std::endl;
       if (delete_path_recurcive(new_path) == -1) {
         std::cout << "Error!!! " << new_path << std::endl;
         return (-1);
@@ -43,7 +57,6 @@ int delete_path_recurcive(std::string &path) {
     std::cout << "success rmdir " << path << std::endl;
   } else if (S_ISREG(stat_buffer.st_mode)) {
     std::cout << path << " is file" << std::endl;
-    // remove(path.c_str());
     if (remove(path.c_str()) != 0) {
       std::cerr << "fail remove(<FILE>) " << path << std::endl;
       return (-1);
@@ -55,7 +68,39 @@ int delete_path_recurcive(std::string &path) {
 
 int main(void) {
   std::string file_name("./test_dir");
+  struct stat stat_buffer;
 
-  delete_path_recurcive(file_name);
+  if (stat(file_name.c_str(), &stat_buffer) != 0) {
+    std::cerr << "fail stat(<File>)" << std::endl;
+    return (-1);  // error
+  }
+
+  if (S_ISDIR(stat_buffer.st_mode)) {
+    DIR *dir_ptr;
+    struct dirent *item;
+
+    if (!(dir_ptr = opendir(file_name.c_str()))) {
+      std::cerr << "fail opendir(<FILE>) " << file_name << std::endl;
+      return (-1);
+    }
+    while ((item = readdir(dir_ptr))) {
+      if (strcmp(item->d_name, ".") == 0 || strcmp(item->d_name, "..") == 0)
+        continue;
+      std::string new_path = make_new_path(file_name, item->d_name);
+      std::cout << "test print new_path : " << new_path << std::endl;
+      if (delete_path_recurcive(new_path) == -1) {
+        std::cout << "Error!!! " << new_path << std::endl;
+        return (-1);
+      }
+    }
+  } else if (S_ISREG(stat_buffer.st_mode)) {
+    std::cout << file_name << " is file" << std::endl;
+    if (remove(file_name.c_str()) != 0) {
+      std::cerr << "fail remove(<FILE>) " << file_name << std::endl;
+      return (-1);
+    }
+    std::cout << "success remove " << file_name << std::endl;
+  }
+
   return (0);
 }
