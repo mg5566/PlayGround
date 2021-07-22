@@ -14,6 +14,24 @@ std::string make_new_path(std::string path, char *d_name) {
   return (new_path);
 }
 
+int remove_file(std::string file_name) {
+  if (remove(file_name.c_str()) != 0) {
+    std::cerr << "fail remove(<FILE>) " << file_name << std::endl;
+    return (-1);
+  }
+  std::cout << "success remove " << file_name << std::endl;
+  return (0);
+}
+
+int remove_directory(std::string directory_name) {
+  if (rmdir(directory_name.c_str()) == -1) {
+    std::cerr << "fail rmdir(<DIR>) " << directory_name << std::endl;
+    return (-1);
+  }
+  std::cout << "success rmdir " << directory_name << std::endl;
+  return (0);
+}
+
 int delete_path_recurcive(std::string &path) {
   struct stat stat_buffer;
   // path 설정
@@ -50,11 +68,13 @@ int delete_path_recurcive(std::string &path) {
       }
     }
     std::cout << "finish inner search " << path << std::endl;
+    return (remove_directory(path));
+    /*
     if (rmdir(path.c_str()) == -1) {
       std::cerr << "fail rmdir(<DIR>) " << path << std::endl;
       return (-1);
     }
-    std::cout << "success rmdir " << path << std::endl;
+    */
   } else if (S_ISREG(stat_buffer.st_mode)) {
     std::cout << path << " is file" << std::endl;
     if (remove(path.c_str()) != 0) {
@@ -95,11 +115,13 @@ int main(void) {
     }
   } else if (S_ISREG(stat_buffer.st_mode)) {
     std::cout << file_name << " is file" << std::endl;
+    return (remove_file(file_name));
+    /*
     if (remove(file_name.c_str()) != 0) {
       std::cerr << "fail remove(<FILE>) " << file_name << std::endl;
       return (-1);
     }
-    std::cout << "success remove " << file_name << std::endl;
+    */
   }
 
   return (0);
