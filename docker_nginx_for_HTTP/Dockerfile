@@ -18,6 +18,7 @@ COPY test.html /usr/share/nginx/html/dav/
 #RUN chmod a+w /var/www/html/dav/test.html
 RUN chmod a+w /html
 
+RUN chown www-data:www-data /usr/share/nginx/html 
 RUN chown www-data:www-data /usr/share/nginx/html/dav 
 RUN chown www-data:www-data /usr/share/nginx/html/dav/test.html
 RUN chown www-data:www-data /html
