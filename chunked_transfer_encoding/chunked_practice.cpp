@@ -33,15 +33,19 @@ bool chunked_close_check(const char *buf, std::string &msg, int len = -1) {
 
   ptr = (char *)buf;
   if (len == -1) {
+    /*
     length = strtoul(ptr, &ptr, 16);
     // std::cout << length << " : " << ptr << std::endl;
+    msg.append(ptr + CRLF, length);
+    std::cout << "msg test : " << msg << "|" << std::endl;
     length += CRLF;
-    msg.append(ptr, length);
+    */
     while ((length = strtoul(ptr + length, &ptr, 16)) > 0) {
-      // std::cout << length << " : " << ptr << std::endl;
-      length += CRLF;
+      std::cout << length << " : " << ptr << std::endl;
       // append
-      msg.append(ptr, length);
+      msg.append(ptr + CRLF, length);
+      std::cout << "msg test : " << msg << std::endl;
+      length += CRLF;
       // check append length
       // append 된 character 의 수를 알아야합니다. appended_len
       // appended_len 이 length 와 같아야 정상이지만, 메세지가 그렇게 호락호락하게 오질 않습니다.
@@ -84,13 +88,12 @@ int main(int argc, char **argv) {
 // int main(void) {
 //   if (1) {
 //     std::string str;
-
 //     // set str
 // set_string(str);
-    std::string msg;
+    std::string msg;  // buffer, decoded data
 
     std::cout << "=============file===============" << std::endl;
-    std::cout << str << std::endl;
+    std::cout << str << std::endl;  // encoded data
     std::cout << "=============file===============" << std::endl;
 
     std::cout << "\n\nlet's check\n\n" << std::endl;
@@ -104,7 +107,6 @@ int main(int argc, char **argv) {
     std::cout << "=============msg================" << std::endl;
     std::cout << msg << std::endl;
     std::cout << "=============msg================" << std::endl;
-
   } else
     std::cout << "Usage: ./chunked_practice filepath" << std::endl;
 }
