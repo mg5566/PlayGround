@@ -18,8 +18,8 @@ typedef struct s_data {
     need_more_append_length = 0;
   };  // 생성과 동시에 초기화를 위한 생성자
 
-  s_data(char *file_name) {
-    fd = open(file_name, O_RDWR);
+  s_data(std::string file_name) {
+    fd = open(file_name.c_str(), O_RDWR | O_CREAT);
     need_more_append_length = 0;
   };
 } t_data;
@@ -71,19 +71,22 @@ bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
 
   // need_more_append_length 가 있으면 마저 읽어 append 후에 length 를 calcuration 합니다.
   if (data.need_more_append_length) {
+    std::cout << "first step : append" << std::endl;
     data.message_buffer.append(ptr, data.need_more_append_length);
   }
   if (len == -1) {
+    std::cout << "here" << std::endl;
     // calc length
     while ((length = strtoul(ptr + length, &ptr, 16)) > 0) {
+      /*
       std::cout << length << " : " << ptr + CRLF << std::endl;
       // append
-      data.message_buffer.append(ptr + CRLF, length);  // 중요한 문제 여기서 appended_len 을 어떻게 계산을 할 수 있는가!?
-      std::cout << "[[[[" << data.message_buffer << "]]]" << std::endl;
-      std::cout << data.message_buffer[6] << std::endl;
+      // data.message_buffer.append(ptr + CRLF, length);  // 중요한 문제 여기서 appended_len 을 어떻게 계산을 할 수 있는가!?
+      data.message_buffer.insert(data.message_buffer.size(), ptr + CRLF, length);
+      std::cout << "[[[" << data.message_buffer << "]]]" << std::endl;
+      std::cout << "[6]: |" << data.message_buffer[6] << "|" << std::endl;
       std::cout << "test size : " << data.message_buffer.size() << std::endl;
       std::cout << "test length() " << data.message_buffer.length() << std::endl;
-      // data.message_buffer.insert(data.message_buffer.size(), ptr + CRLF, length);
       std::cout << "test print length to end : " << data.message_buffer.find("") << std::endl;
 
       // 지금 문제! 7개를 넣었는데, 뒤에 2글자를 더 읽어오기때문데 무조건 9개를 읽어온다....
@@ -95,9 +98,20 @@ bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
       std::cout << std::setw(25) << std::left << "msg buffer length " << " : " << data.message_buffer.length() << std::endl;
       std::cout << std::setw(25) << std::left << "need more read length " << " : " << data.need_more_append_length << std::endl;
       std::cout << "---finish test print lengths----" << std::endl;
+      */
 
-      // fd 활용 예제
-      // data.need_more_append_length = write(data.fd, ptr + CRLF, length);
+      std::cout << "test print ptr + CRLF" << std::endl;
+      std::cout << ptr + CRLF << std::endl;
+      // fd 활용 예제 무조건 활용을 하게 되어있습니다. 위에껀 고려하지 마세요!
+      size_t temp;
+      temp = write(data.fd, ptr + CRLF, length);
+      data.need_more_append_length = length - temp;
+      // data.need_more_append_length = length - write(data.fd, ptr + CRLF, length);
+      std::cout << "-------test print lengths-------" << std::endl;
+      std::cout << std::setw(25) << std::left << "length " << " : " << length << std::endl;
+      std::cout << std::setw(25) << std::left << "temp " << " : " << temp << std::endl;
+      std::cout << std::setw(25) << std::left << "need more read length " << " : " << data.need_more_append_length << std::endl;
+      std::cout << "---finish test print lengths----" << std::endl;
 
       std::cout << "data.message_buffer test : " << data.message_buffer << std::endl;
       length += CRLF;
@@ -129,13 +143,15 @@ bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
 int main(int argc, char **argv) {
   if (argc == 2) {
     std::ifstream t(argv[1]);
-    std::string str((std::istreambuf_iterator<char>(t)),
+    std::string str1((std::istreambuf_iterator<char>(t)),
                     std::istreambuf_iterator<char>());
+
+    std::string str;
 
     str.clear();
     set_step_1(str);
 
-    t_data data;  // 선언과 동시에 생성자가 알아서 호출됨.
+    t_data data("./output_decode");  // 선언과 동시에 생성자가 알아서 호출됨.
     // t_data data(argv[2]);
     // t_data *data = (t_data *)malloc(sizeof(t_data) * 1)); 이 과정을 생략할 수 있습니다.
 
@@ -147,6 +163,7 @@ int main(int argc, char **argv) {
               << std::endl;
 
     // chunked decoder
+    // if (chunked_close_check(str.c_str(), data))
     if (chunked_close_check(str.c_str(), data))
       std::cout << "close" << std::endl;
     else
