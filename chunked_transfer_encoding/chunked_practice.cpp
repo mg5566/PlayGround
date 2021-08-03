@@ -13,6 +13,7 @@ typedef struct s_data {
   int fd;
   size_t need_more_append_length;
   std::string message_buffer;
+
   s_data() {
     need_more_append_length = 0;
   };  // 생성과 동시에 초기화를 위한 생성자
@@ -60,6 +61,7 @@ void set_step_3(std::string &str) {
   str += "\r\n";
 }
 
+// decoder
 bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
   bool result = false;
   size_t length = 0;
@@ -77,6 +79,13 @@ bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
       std::cout << length << " : " << ptr + CRLF << std::endl;
       // append
       data.message_buffer.append(ptr + CRLF, length);  // 중요한 문제 여기서 appended_len 을 어떻게 계산을 할 수 있는가!?
+      std::cout << "[[[[" << data.message_buffer << "]]]" << std::endl;
+      std::cout << data.message_buffer[6] << std::endl;
+      std::cout << "test size : " << data.message_buffer.size() << std::endl;
+      std::cout << "test length() " << data.message_buffer.length() << std::endl;
+      // data.message_buffer.insert(data.message_buffer.size(), ptr + CRLF, length);
+      std::cout << "test print length to end : " << data.message_buffer.find("") << std::endl;
+
       // 지금 문제! 7개를 넣었는데, 뒤에 2글자를 더 읽어오기때문데 무조건 9개를 읽어온다....
       // 따라서 need_more_append_length 는 무조건 0이 나오는 문제에 닥쳤다... ptr 로 읽는건 힘들다...
       // length = 9, appended buffer length = 7  >> need more append 2 character
@@ -137,6 +146,7 @@ int main(int argc, char **argv) {
     std::cout << "\n\nlet's check\n\n"
               << std::endl;
 
+    // chunked decoder
     if (chunked_close_check(str.c_str(), data))
       std::cout << "close" << std::endl;
     else
