@@ -62,7 +62,7 @@ void set_step_3(std::string &str) {
 }
 
 // decoder
-bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
+bool chunked_decode(const char *buf, t_data &data, int len = -1) {
   bool result = false;
   size_t length = 0;
   char *ptr;
@@ -72,9 +72,9 @@ bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
   // need_more_append_length 가 있으면 마저 읽어 append 후에 length 를 calcuration 합니다.
   if (data.need_more_append_length) {
     std::cout << "first step : append" << std::endl;
-    // data.message_buffer.append(ptr, data.need_more_append_length);
-    write(data.fd, ptr, data.need_more_append_length);
-    data.need_more_append_length = 0;
+    // write(data.fd, ptr, data.need_more_append_length);
+    size_t write_len = write(data.fd, ptr, std::min(data.need_more_append_length, strlen(ptr)));
+    data.need_more_append_length -= write_len;
   }
   if (len == -1) {
     // calc length
@@ -156,8 +156,8 @@ int main(int argc, char **argv) {
               << std::endl;
 
     // chunked decoder
-    // if (chunked_close_check(str.c_str(), data))
-    if (chunked_close_check(str.c_str(), data))
+    // if (chunked_decode(str.c_str(), data))
+    if (chunked_decode(str.c_str(), data))
       std::cout << "close" << std::endl;
     else
       std::cout << "can't close" << std::endl;
@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
     std::cout << "\n\nlet's check\n\n"
               << std::endl;
 
-    if (chunked_close_check(str.c_str(), data))
+    if (chunked_decode(str.c_str(), data))
       std::cout << "close" << std::endl;
     else
       std::cout << "can't close" << std::endl;
@@ -187,7 +187,7 @@ int main(int argc, char **argv) {
     std::cout << "\n\nlet's check\n\n"
               << std::endl;
 
-    if (chunked_close_check(str.c_str(), data))
+    if (chunked_decode(str.c_str(), data))
       std::cout << "close" << std::endl;
     else
       std::cout << "can't close" << std::endl;
