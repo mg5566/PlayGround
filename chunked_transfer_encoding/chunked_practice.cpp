@@ -3,13 +3,26 @@
 #include <iostream>
 #include <streambuf>
 #include <string>
+#include <fcntl.h>
+#include <unistd.h>
 
 #define CRLF 2
 
 typedef struct  s_data {
+  int           fd;
   size_t        appended_length;
+  size_t        previous_message_buffer_length;
   std::string   message_buffer;
-  s_data data() { appended_length = 0; };  // 생성과 동시에 초기화를 위한 생성자
+  s_data data() {
+    appended_length = 0;
+    previous_message_buffer_length = message_buffer.length();
+  };  // 생성과 동시에 초기화를 위한 생성자
+
+  s_data data(char *file_name) {
+    fd = open(file_name, O_RDWR);
+    appended_length = 0;
+    previous_message_buffer_length = message_buffer.length();
+  }
 }               t_data;
 
 void set_string(std::string &str) {
@@ -20,7 +33,9 @@ void set_string(std::string &str) {
 
   str += "b";
   str += "\r\n";
-  str += "webserv";
+  str += "web";
+
+  str += "serv";
   str += "\r\n";
   str += "GG";
   str += "\r\n";
@@ -51,6 +66,11 @@ bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
       std::cout << length << " : " << ptr << std::endl;
       // append
       data.message_buffer.append(ptr + CRLF, length);  // 중요한 문제 여기서 appended_len 을 어떻게 계산을 할 수 있는가!?
+      // data.appended_length = data.message_buffer.length() - data.previous_message_buffer_length;
+
+      // fd 활용 예제
+      data.appended_length = write(data.fd, ptr + CRLF, length);
+
       std::cout << "data.message_buffer test : " << data.message_buffer << std::endl;
       length += CRLF;
       // check append length
@@ -82,6 +102,8 @@ bool chunked_close_check(const char *buf, t_data &data, int len = -1) {
         std::cout << "===can't finish===" << std::endl;
       }
     }
+  } else {
+    // content - length
   }
   return (result);
 }
@@ -99,6 +121,7 @@ int main(int argc, char **argv) {
     // set_string(str);
     // std::string msg;  // buffer, decoded data
     t_data  data;  // 선언과 동시에 생성자가 알아서 호출됨.
+    // t_data data(argv[2]);
     // t_data *data = (t_data *)malloc(sizeof(t_data) * 1)); 이 과정을 생략할 수 있습니다.
 
     std::cout << "=============file===============" << std::endl;
@@ -116,7 +139,7 @@ int main(int argc, char **argv) {
       std::cout << "can't close" << std::endl;
 
     std::cout << "=============msg================" << std::endl;
-    std::cout << msg << std::endl;
+    std::cout << data.message_buffer << std::endl;
     std::cout << "=============msg================" << std::endl;
   } else
     std::cout << "Usage: ./chunked_practice filepath" << std::endl;
