@@ -2,7 +2,7 @@
 #include <iostream>
 #include <streambuf>
 #include <string>
-#include <cstdio>
+#include <cstdio>  // sprintf  --> convert int to hex
 
 #define CRLF "\r\n"
 
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   std::string str((std::istreambuf_iterator<char>(file)),  // 이거 왜 괄호를 채워야 error 가 없어짐???
                   std::istreambuf_iterator<char>());
   std::cout << "=====str=====" << std::endl;
-  std::cout << str << std::endl;
+  std::cout << str;
   std::cout << "=============" << std::endl;
 
   // 1. calc body size
