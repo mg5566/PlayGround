@@ -1,11 +1,18 @@
-import { Fragment } from 'react';
-import SignIn from './templates/sign-in/SignIn';
+import { Routes, Route } from "react-router-dom";
+import Dashboard from "./templates/dashboard/Dashboard";
+import SignIn from "./templates/sign-in/SignIn";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
-    <Fragment>
-      <SignIn />
-    </Fragment>
+    <div>
+      <Routes>
+        <Route path="*" element={<NotFound />} />
+        <Route path="/" element={<h2>practice MUI</h2>} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </div>
   );
 }
 
