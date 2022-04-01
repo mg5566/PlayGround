@@ -1,8 +1,10 @@
-import Example from "./echarts/Example";
+import BarExample from "./echarts/BarExample";
+import PieExample from "./echarts/PieExample";
 
 function App() {
   return <div>
-    <Example />
+    <BarExample />
+    <PieExample />
   </div>;
 }
 

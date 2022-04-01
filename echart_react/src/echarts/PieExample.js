@@ -1,31 +1,6 @@
 import ReactECharts from "echarts-for-react";
 
-const Example = () => {
-  const barChartOptions = {
-    title: {
-      text: 'Basic fuck you',
-      subtext: 'Fake Data',
-      left: 'center'
-    },
-    xAxis: {
-      type: "category",
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
-        type: "line",
-        smooth: true,
-      },
-    ],
-    tooltip: {
-      trigger: "axis",
-    },
-  };
-
+const PieExample = () => {
   const pieChartOptions = {
     title: {
       text: 'Referer of a Website',
@@ -36,8 +11,8 @@ const Example = () => {
       trigger: 'item'
     },
     legend: {
-      orient: 'vertical',
-      left: 'left'
+      orient: 'horizontal',
+      bottom: "bottom",
     },
     series: [
       {
@@ -62,8 +37,7 @@ const Example = () => {
     ]
   };
 
-  return <ReactECharts option={barChartOptions} />;
-  // return <ReactECharts option={pieChartOptions} />;
+  return <ReactECharts option={pieChartOptions} />;
 };
 
-export default Example;
+export default PieExample;
