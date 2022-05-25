@@ -14,35 +14,81 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Modal } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router";
+import { useMutation } from "react-query";
 
 const theme = createTheme();
 
 const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
+  bgcolor: "background.paper",
+  border: "2px solid #000",
   boxShadow: 24,
   p: 4,
 };
 
+type SuccessResponse = {
+  localId: string;
+  email: string;
+  displayName: string | null;
+  idToken: string;
+  registered: boolean;
+  refreshToken: string;
+  expiresIn: number;
+};
+
+type ErrorResponse = {
+  errorCode: string;
+};
+
+type userData = {
+  email: string;
+  password: string;
+};
+
 export default function SignIn() {
+  const navigate = useNavigate();
+  const mutate = useMutation(({ email, password }: userData) => {
+    // const mutate = useMutation<SuccessResponse, ErrorResponse, void, unknown>((loginData) => {
+    fetch(
+      "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCPcd_i8PTVqWAjy5Ce1Ja5IGRqyq9fh_c",
+      {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  });
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
+    console.log("handlerSubmit", {
       email: data.get("email"),
       password: data.get("password"),
     });
     handleOpen();
+    // TODO: login
+    try {
+      // write useMutation hook
+      const user = mutate.mutateAsync({
+        email: data.get("email"),
+        password: data.get("password"),
+      });
+      navigate("/");
+    } catch (err) {
+      // TODO error handlering
+    }
   };
   const [open, setOpen] = useState<boolean>(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
 
   return (
     <ThemeProvider theme={theme}>
