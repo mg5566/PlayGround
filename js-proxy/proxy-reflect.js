@@ -4,26 +4,33 @@ const handler = {
   get(target, property, receiver) {
     console.log(
       "target: ",
-        target,
-        ", property : ",
-        property,
-        ", receiver: ",
-        receiver
+      target,
+      ", property : ",
+      property,
+      ", receiver: ",
+      receiver
     );
-    return target[property]
+    return target[property];
   },
   set(target, property, value, receiver) {
     console.log(
       "target: ",
-        target,
-        ", property : ",
-        property,
-        ", value: ",
-        value,
-        ", receiver: ",
-        receiver
+      target,
+      ", property : ",
+      property,
+      ", value: ",
+      value,
+      ", receiver: ",
+      receiver
     );
-    target[property] = value;
+    if (typeof value === "number") {
+      console.log("value is number type!");
+      target[property] = value;
+      return true;
+    } else {
+      console.log("value is not number type!!!!!");
+      return false;
+    }
   },
 };
 
@@ -38,6 +45,7 @@ console.log(obj.c);
 console.log(proxy.a);
 console.log(proxy.b);
 console.log(proxy.c);
+console.log(proxy.c = 4);
 
 // 최종 정리
 const targetMap = new WeakMap();
